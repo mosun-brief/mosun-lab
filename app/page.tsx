@@ -1,7 +1,11 @@
 import Link from "next/link";
 import SubscribeForm from "@/components/SubscribeForm";
+import { getLabSubscriberCount } from "@/lib/metrics";
 import { getAllPosts, formatLogNo } from "@/lib/posts";
 import { channels, metrics, site } from "@/site.config";
+
+// 공개 지표(구독자 수)를 최대 5분 간격으로 다시 집계합니다.
+export const revalidate = 300;
 
 function PulseMark({ width = 220 }: { width?: number }) {
   return (
@@ -18,8 +22,20 @@ function PulseMark({ width = 220 }: { width?: number }) {
   );
 }
 
-export default function HomePage() {
-  const posts = getAllPosts().slice(0, 5);
+export default async function HomePage() {
+  const allPosts = getAllPosts();
+  const posts = allPosts.slice(0, 5);
+  const subscriberCount = await getLabSubscriberCount();
+
+  const metricItems = [
+    {
+      label: "기록 구독자",
+      value: `${subscriberCount ?? 0}명`,
+    },
+    { label: "작품 수익", value: metrics.revenue },
+    { label: "발행한 기록", value: `${allPosts.length}편` },
+    { label: "만든 작품", value: metrics.works },
+  ];
 
   return (
     <main>
@@ -46,18 +62,15 @@ export default function HomePage() {
 
       <section className="section">
         <div className="wrap">
-          <h2 className="section-head">공개 지표 · {metrics.updatedAt} 기준</h2>
+          <h2 className="section-head">공개 지표</h2>
           <div className="metrics">
-            {metrics.items.map((item) => (
+            {metricItems.map((item) => (
               <div className="metric" key={item.label}>
                 <div className="metric-value">{item.value}</div>
                 <div className="metric-label">{item.label}</div>
               </div>
             ))}
           </div>
-          <p className="metrics-note">
-            규칙 1번: 숫자를 전부 공개합니다 — 0인 지금부터.
-          </p>
         </div>
       </section>
 

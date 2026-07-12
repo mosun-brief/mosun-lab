@@ -30,13 +30,9 @@ export const channels = [
   // { name: "쓰레드", role: "짧은 생각", description: "일지 사이의 메모", url: "https://www.threads.net/@핸들" },
 ];
 
-// 공개 지표 — 매달 직접 갱신합니다. 0에서 시작하는 것 자체가 콘텐츠입니다.
+// 공개 지표 — 구독자 수와 기록 수는 자동 집계되고, 아래 둘만 직접 갱신합니다.
+// 0에서 시작하는 것 자체가 콘텐츠입니다.
 export const metrics = {
-  updatedAt: "2026-07-12",
-  items: [
-    { label: "이메일 구독자", value: "0명" },
-    { label: "작품 수익", value: "₩0" },
-    { label: "발행한 기록", value: "1편" },
-    { label: "만든 작품", value: "1개" },
-  ],
+  revenue: "₩0",
+  works: "1개",
 };

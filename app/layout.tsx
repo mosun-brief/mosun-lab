@@ -17,11 +17,25 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mosunbrief.kr"),
   title: {
     default: `${site.name} — 응급실 밖 기록`,
     template: `%s — ${site.name}`,
   },
   description: site.description,
+  openGraph: {
+    title: `${site.name} — 응급실 밖 기록`,
+    description: site.description,
+    url: "https://mosunbrief.kr",
+    siteName: site.name,
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${site.name} — 응급실 밖 기록`,
+    description: site.description,
+  },
 };
 
 function PulseGlyph() {

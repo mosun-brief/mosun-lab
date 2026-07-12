@@ -125,7 +125,7 @@ a {
   gap: 10px;
   font-family: var(--font-serif);
   font-size: 19px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.02em;
   text-decoration: none;
 }
@@ -172,7 +172,7 @@ a {
 .hero-eyebrow {
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 22px;
@@ -181,7 +181,7 @@ a {
 .hero h1 {
   font-family: var(--font-serif);
   font-size: clamp(32px, 5.4vw, 56px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.32;
   letter-spacing: -0.03em;
   text-wrap: balance;
@@ -215,7 +215,7 @@ a {
   display: block;
   font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 6px;
@@ -239,7 +239,7 @@ a {
 .section-head {
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 26px;
@@ -269,10 +269,10 @@ a {
 }
 
 .metric .metric-value {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
-  font-size: 26px;
-  font-weight: 900;
+  font-size: 25px;
+  font-weight: 700;
   color: var(--clay);
   letter-spacing: -0.02em;
 }
@@ -382,7 +382,7 @@ a {
 .channel .channel-role {
   font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -416,7 +416,7 @@ a {
 .post h1 {
   font-family: var(--font-serif);
   font-size: clamp(27px, 4.6vw, 38px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.4;
   letter-spacing: -0.03em;
   text-wrap: balance;
@@ -441,7 +441,7 @@ a {
 .post-body h2 {
   font-family: var(--font-serif);
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 700;
   margin-top: 2.1em;
   letter-spacing: -0.02em;
 }
@@ -499,7 +499,7 @@ a {
 }
 
 .post-body strong {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 /* ── 구독 박스 ───────────────────────────────── */
@@ -514,7 +514,7 @@ a {
 .subscribe-box h2 {
   font-family: var(--font-serif);
   font-size: 21px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: 8px;
 }
