@@ -2,7 +2,8 @@
 
 export const site = {
   name: "모순책장",
-  tagline: "응급실에서는 환자를 봅니다. 응급실 밖에서는 AI와 회사를 짓습니다.",
+  tagline:
+    "응급실에서는 환자를 봅니다. 응급실 밖에서는 AI와 함께 회사를 만들어 나갑니다.",
   description:
     "응급의학과 의사가 AI와 협업하며 1인 기업을 만들어가는 기록",
   hypothesis:

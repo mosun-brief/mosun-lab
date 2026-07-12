@@ -5,7 +5,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const LINE_1 = "응급실에서는 환자를 봅니다.";
-const LINE_2 = "응급실 밖에서는 AI와 회사를 짓습니다.";
+const LINE_2 = "응급실 밖에서는 AI와 함께 회사를 만들어 나갑니다.";
 const FOOTER = "모순책장 · 응급실 밖 기록 — mosunbrief.kr";
 
 async function loadGoogleFont(family: string, text: string) {
@@ -59,7 +59,7 @@ export default async function OgImage() {
             display: "flex",
             flexDirection: "column",
             marginTop: 36,
-            fontSize: 58,
+            fontSize: 50,
             fontWeight: 700,
             lineHeight: 1.45,
             letterSpacing: "-0.02em",
