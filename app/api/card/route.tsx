@@ -46,6 +46,15 @@ export async function GET(request: Request) {
   const fontText = eyebrow + lines.join("") + footer;
   const fontData = await loadGoogleFont("Noto+Serif+KR:wght@700", fontText);
 
+  // 프로필 그리드(3:4) 크롭을 견디는 안전 영역: 좌우 여백을 넉넉히 두고,
+  // 가장 긴 줄이 그 안에 들어가도록 글자 크기를 자동 조절합니다.
+  const contentWidth = WIDTH - 150 * 2;
+  const longestLine = Math.max(...lines.map((line) => line.length), 1);
+  const fontSize = Math.max(
+    36,
+    Math.min(60, Math.floor(contentWidth / longestLine))
+  );
+
   return new ImageResponse(
     (
       <div
@@ -55,7 +64,7 @@ export async function GET(request: Request) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "0 96px",
+          padding: "0 150px",
           backgroundColor: "#faf9f5",
           color: "#1f1e1d",
           fontFamily: "NotoSerifKR",
@@ -86,9 +95,9 @@ export async function GET(request: Request) {
             display: "flex",
             flexDirection: "column",
             marginTop: 48,
-            fontSize: 62,
+            fontSize,
             fontWeight: 700,
-            lineHeight: 1.55,
+            lineHeight: 1.6,
             letterSpacing: "-0.02em",
           }}
         >
