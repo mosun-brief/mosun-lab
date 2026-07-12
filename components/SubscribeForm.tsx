@@ -51,7 +51,7 @@ export default function SubscribeForm() {
 
   return (
     <div className="subscribe-box" id="subscribe">
-      <h2>실험 일지를 이메일로</h2>
+      <h2>공방 일지를 이메일로</h2>
       <p className="subscribe-desc">
         새 일지가 나오면 보내드립니다. 광고나 스팸은 없고, 언제든 해지할 수
         있습니다.

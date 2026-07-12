@@ -12,7 +12,7 @@ const notoSerif = Noto_Serif_KR({
 
 export const metadata: Metadata = {
   title: {
-    default: `${site.name} — 응급실 밖 실험실`,
+    default: `${site.name} — 응급실 밖 공방`,
     template: `%s — ${site.name}`,
   },
   description: site.description,
@@ -32,7 +32,7 @@ export default function RootLayout({
               모순책장<span className="brand-dot">.</span>
             </Link>
             <nav className="nav" aria-label="주요 메뉴">
-              <Link href="/log">실험 일지</Link>
+              <Link href="/log">공방 일지</Link>
               <Link href="/about">소개</Link>
               <Link href="/#subscribe">구독</Link>
             </nav>
@@ -43,7 +43,7 @@ export default function RootLayout({
 
         <footer className="footer">
           <div className="wrap footer-inner">
-            <span>© {new Date().getFullYear()} 모순책장 · 응급실 밖 실험실</span>
+            <span>© {new Date().getFullYear()} 모순책장 · 응급실 밖 공방</span>
             <span>
               <a href="https://brief.mosunbrief.kr/" rel="noopener">
                 Mosun Brief

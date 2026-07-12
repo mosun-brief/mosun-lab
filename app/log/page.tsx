@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getAllPosts, formatLogNo } from "@/lib/posts";
 
 export const metadata: Metadata = {
-  title: "실험 일지",
+  title: "공방 일지",
   description: "응급실 밖에서 AI와 1인 기업을 만드는 전 과정의 기록",
 };
 
@@ -14,8 +14,8 @@ export default function LogListPage() {
     <main>
       <section className="hero">
         <div className="wrap">
-          <p className="hero-eyebrow">Experiment Log</p>
-          <h1>실험 일지</h1>
+          <p className="hero-eyebrow">Workshop Log</p>
+          <h1>공방 일지</h1>
           <p className="hero-desc">
             숫자 공개, 실패 기록, 재현 가능한 과정 — 세 가지 규칙으로 쓰는
             기록의 전부입니다.
