@@ -26,9 +26,18 @@ export const channels = [
     description: "AI 학습자를 위한 맞춤 브리핑 서비스",
     url: "https://brief.mosunbrief.kr/",
   },
-  // 인스타그램·쓰레드는 계정이 생기면 여기에 추가:
-  // { name: "인스타그램", role: "일상 기록", description: "실험의 장면들", url: "https://www.instagram.com/핸들" },
-  // { name: "쓰레드", role: "짧은 생각", description: "일지 사이의 메모", url: "https://www.threads.net/@핸들" },
+  {
+    name: "인스타그램",
+    role: "기록 카드",
+    description: "기록의 장면들을 카드로",
+    url: "https://www.instagram.com/gree_napple98",
+  },
+  {
+    name: "쓰레드",
+    role: "짧은 생각",
+    description: "기록 사이의 메모",
+    url: "https://www.threads.net/@gree_napple98",
+  },
 ];
 
 // 공개 지표 — 구독자 수와 기록 수는 자동 집계되고, 아래 둘만 직접 갱신합니다.
