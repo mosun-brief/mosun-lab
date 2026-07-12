@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-// mosun-brief와 같은 Supabase를 씁니다. 공방 일지 구독자는 signup_source='lab'
+// mosun-brief와 같은 Supabase를 씁니다. 기록 구독자는 signup_source='lab'
 // 하나의 리스트로 모입니다 (거점 사이트에서 오든 /lab 페이지에서 오든 동일).
 
 function getSupabaseAdminClient() {
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "구독이 완료되었습니다. 새 공방 일지가 나오면 보내드릴게요.",
+      message: "구독이 완료되었습니다. 새 기록이 나오면 보내드릴게요.",
     });
   } catch (error) {
     const message =

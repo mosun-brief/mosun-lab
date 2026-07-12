@@ -1,30 +1,16 @@
 :root {
-  --bg: #eff1ea;
+  --bg: #faf9f5;
   --surface: #ffffff;
-  --ink: #1e2a26;
-  --muted: #5c6660;
-  --accent: #265c52;
-  --accent-soft: #dde6e0;
-  --amber: #b07b2e;
-  --rule: #d9dccf;
-  --code-bg: #e7eae0;
+  --ink: #1f1e1d;
+  --muted: #6f6a5f;
+  --accent: #a34e31;
+  --clay: #c6613f;
+  --clay-tint: #f6e8e1;
+  --rule: #e5e1d6;
+  --band: #f0eee6;
 
   --font-serif: var(--font-noto-serif), "Iowan Old Style", Georgia, serif;
-  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #131715;
-    --surface: #1b211e;
-    --ink: #e7e6dd;
-    --muted: #99a39c;
-    --accent: #55a693;
-    --accent-soft: #22302b;
-    --amber: #d3a458;
-    --rule: #2a322e;
-    --code-bg: #212824;
-  }
+  --font-sans: var(--font-noto-sans), "Apple SD Gothic Neo", sans-serif;
 }
 
 * {
@@ -40,9 +26,10 @@ html {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-serif);
-  font-size: 16.5px;
+  font-family: var(--font-sans);
+  font-size: 16px;
   line-height: 1.75;
+  word-break: keep-all;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -51,20 +38,76 @@ a {
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--clay);
   color: var(--bg);
 }
 
 .wrap {
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto;
-  padding: 0 22px;
+  padding: 0 24px;
+}
+
+/* ── 심전도 마크 & 등장 모션 ─────────────────── */
+
+.pulse {
+  display: block;
+  margin: 0 0 28px;
+  overflow: visible;
+}
+
+.pulse polyline {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 340;
+  stroke-dashoffset: 340;
+  animation: draw-pulse 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.25s forwards;
+}
+
+@keyframes draw-pulse {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.rise {
+  opacity: 0;
+  animation: rise 0.75s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .rise {
+    animation: none;
+    opacity: 1;
+  }
+  .pulse polyline {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ── 상단 마스트헤드 ─────────────────────────── */
 
 .masthead {
   border-bottom: 1px solid var(--rule);
+  background: var(--bg);
 }
 
 .masthead-inner {
@@ -72,62 +115,77 @@ a {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 20px 0;
+  padding: 18px 0;
   flex-wrap: wrap;
 }
 
 .brand {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 19px;
   font-weight: 900;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   text-decoration: none;
 }
 
 .brand .brand-dot {
-  color: var(--accent);
+  color: var(--clay);
 }
 
 .nav {
   display: flex;
-  gap: 22px;
+  align-items: center;
+  gap: 20px;
 }
 
 .nav a {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
+  font-size: 13.5px;
+  font-weight: 600;
   text-decoration: none;
   color: var(--muted);
-  text-transform: uppercase;
 }
 
 .nav a:hover {
   color: var(--accent);
 }
 
+.nav a.nav-cta {
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 7px 16px;
+}
+
+.nav a.nav-cta:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
 /* ── 히어로 ─────────────────────────────────── */
 
 .hero {
-  padding: 72px 0 56px;
-  border-bottom: 1px solid var(--rule);
+  padding: 80px 0 64px;
 }
 
 .hero-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  color: var(--amber);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin-bottom: 18px;
+  color: var(--accent);
+  margin-bottom: 22px;
 }
 
 .hero h1 {
-  font-size: clamp(28px, 5.2vw, 42px);
+  font-family: var(--font-serif);
+  font-size: clamp(32px, 5.4vw, 56px);
   font-weight: 900;
-  line-height: 1.35;
-  letter-spacing: -0.02em;
+  line-height: 1.32;
+  letter-spacing: -0.03em;
   text-wrap: balance;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .hero h1 em {
@@ -137,23 +195,26 @@ a {
 
 .hero .hero-desc {
   font-size: 17px;
+  line-height: 1.85;
   color: var(--muted);
   max-width: 58ch;
   margin-bottom: 30px;
 }
 
 .hypothesis {
-  border-left: 3px solid var(--accent);
-  background: var(--accent-soft);
-  padding: 16px 20px;
+  border-left: 3px solid var(--clay);
+  background: var(--clay-tint);
+  border-radius: 0 14px 14px 0;
+  padding: 18px 22px;
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.75;
+  max-width: 640px;
 }
 
 .hypothesis .hypothesis-label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
@@ -163,8 +224,12 @@ a {
 /* ── 섹션 공통 ───────────────────────────────── */
 
 .section {
-  padding: 52px 0;
+  padding: 56px 0;
   border-bottom: 1px solid var(--rule);
+}
+
+.section:first-of-type {
+  border-top: 1px solid var(--rule);
 }
 
 .section:last-of-type {
@@ -172,11 +237,11 @@ a {
 }
 
 .section-head {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--accent);
   margin-bottom: 26px;
 }
 
@@ -188,6 +253,8 @@ a {
   gap: 1px;
   background: var(--rule);
   border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 @media (max-width: 620px) {
@@ -198,15 +265,16 @@ a {
 
 .metric {
   background: var(--surface);
-  padding: 18px 16px;
+  padding: 20px 18px;
 }
 
 .metric .metric-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-serif);
   font-variant-numeric: tabular-nums;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--amber);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--clay);
+  letter-spacing: -0.02em;
 }
 
 .metric .metric-label {
@@ -221,7 +289,7 @@ a {
   margin-top: 14px;
 }
 
-/* ── 일지 목록 ───────────────────────────────── */
+/* ── 기록 목록 ───────────────────────────────── */
 
 .log-list {
   list-style: none;
@@ -239,9 +307,9 @@ a {
 
 .log-link {
   display: grid;
-  grid-template-columns: 84px 1fr;
+  grid-template-columns: 92px 1fr;
   gap: 8px 20px;
-  padding: 20px 0;
+  padding: 22px 0;
   text-decoration: none;
 }
 
@@ -252,16 +320,19 @@ a {
 }
 
 .log-no {
-  font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--amber);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--clay);
   padding-top: 5px;
 }
 
 .log-title {
+  font-family: var(--font-serif);
   font-size: 19px;
   font-weight: 700;
   line-height: 1.5;
+  letter-spacing: -0.02em;
 }
 
 .log-link:hover .log-title {
@@ -298,24 +369,27 @@ a {
   display: block;
   background: var(--surface);
   border: 1px solid var(--rule);
-  padding: 18px 20px;
+  border-radius: 16px;
+  padding: 20px 22px;
   text-decoration: none;
+  transition: border-color 0.12s ease;
 }
 
 .channel:hover {
-  border-color: var(--accent);
+  border-color: var(--clay);
 }
 
 .channel .channel-role {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
 .channel .channel-name {
-  font-size: 17px;
+  font-family: var(--font-serif);
+  font-size: 17.5px;
   font-weight: 700;
   margin: 6px 0 4px;
 }
@@ -328,58 +402,62 @@ a {
 /* ── 글 본문 ─────────────────────────────────── */
 
 .post {
-  padding: 64px 0 40px;
+  padding: 72px 0 40px;
 }
 
 .post-no {
-  font-family: var(--font-mono);
   font-size: 13px;
+  font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--amber);
+  color: var(--clay);
   margin-bottom: 14px;
 }
 
 .post h1 {
-  font-size: clamp(26px, 4.6vw, 36px);
+  font-family: var(--font-serif);
+  font-size: clamp(27px, 4.6vw, 38px);
   font-weight: 900;
   line-height: 1.4;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   text-wrap: balance;
   margin-bottom: 12px;
 }
 
 .post-date {
-  font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--muted);
   margin-bottom: 44px;
 }
 
 .post-body {
-  font-size: 17px;
+  font-size: 16.5px;
+  max-width: 660px;
 }
 
 .post-body > * + * {
-  margin-top: 1.1em;
+  margin-top: 1.15em;
 }
 
 .post-body h2 {
+  font-family: var(--font-serif);
   font-size: 22px;
   font-weight: 900;
-  margin-top: 2em;
-  letter-spacing: -0.01em;
+  margin-top: 2.1em;
+  letter-spacing: -0.02em;
 }
 
 .post-body h3 {
+  font-family: var(--font-serif);
   font-size: 18px;
   font-weight: 700;
   margin-top: 1.6em;
 }
 
 .post-body blockquote {
-  border-left: 3px solid var(--accent);
-  background: var(--accent-soft);
-  padding: 14px 20px;
+  border-left: 3px solid var(--clay);
+  background: var(--clay-tint);
+  border-radius: 0 12px 12px 0;
+  padding: 15px 20px;
   font-weight: 600;
 }
 
@@ -408,16 +486,16 @@ a {
 }
 
 .post-body code {
-  font-family: var(--font-mono);
   font-size: 0.88em;
-  background: var(--code-bg);
+  background: var(--band);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .post-body img {
   max-width: 100%;
   height: auto;
+  border-radius: 12px;
 }
 
 .post-body strong {
@@ -429,13 +507,15 @@ a {
 .subscribe-box {
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-top: 3px solid var(--accent);
-  padding: 28px;
+  border-radius: 18px;
+  padding: 30px;
 }
 
 .subscribe-box h2 {
-  font-size: 20px;
+  font-family: var(--font-serif);
+  font-size: 21px;
   font-weight: 900;
+  letter-spacing: -0.02em;
   margin-bottom: 8px;
 }
 
@@ -455,27 +535,35 @@ a {
   flex: 1;
   min-width: 200px;
   border: 1px solid var(--rule);
-  background: var(--bg);
+  border-radius: 12px;
+  background: var(--surface);
   color: var(--ink);
   font-family: inherit;
   font-size: 15px;
-  padding: 12px 14px;
+  padding: 13px 15px;
+  outline: none;
 }
 
 .subscribe-form input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  border-color: var(--clay);
+  box-shadow: 0 0 0 3px var(--clay-tint);
 }
 
 .subscribe-form button {
   border: none;
-  background: var(--accent);
-  color: #f4f6f1;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  padding: 12px 22px;
+  padding: 13px 26px;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.subscribe-form button:hover {
+  background: var(--accent);
 }
 
 .subscribe-form button:disabled {
@@ -494,7 +582,7 @@ a {
 }
 
 .subscribe-message.error {
-  color: #b4442c;
+  color: #9c3b21;
 }
 
 /* ── 푸터 ───────────────────────────────────── */
@@ -505,12 +593,12 @@ a {
 }
 
 .footer-inner {
-  padding: 28px 0 44px;
+  padding: 28px 0 48px;
   display: flex;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -525,14 +613,9 @@ a {
 
 /* ── 접근성 ─────────────────────────────────── */
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
 a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent);
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--clay);
   outline-offset: 2px;
 }

@@ -4,11 +4,11 @@ export const site = {
   name: "모순책장",
   tagline: "응급실에서는 환자를 봅니다. 응급실 밖에서는 AI와 회사를 짓습니다.",
   description:
-    "응급의학과 의사가 AI와 협업하며 1인 기업을 만들어가는 공방 일지",
+    "응급의학과 의사가 AI와 협업하며 1인 기업을 만들어가는 기록",
   hypothesis:
     "응급실 밖에서, 의사 혼자서도, AI와 협업하면 수익을 내는 1인 기업을 만들 수 있다.",
   author: "모순책장",
-  // 공방을 연 날 — 선언문 발행일로 맞춰주세요.
+  // 기록을 시작한 날 — 선언문 발행일로 맞춰주세요.
   startDate: "2026-07-12",
 };
 
@@ -35,8 +35,8 @@ export const metrics = {
   updatedAt: "2026-07-12",
   items: [
     { label: "이메일 구독자", value: "0명" },
-    { label: "공방 수익", value: "₩0" },
-    { label: "발행한 일지", value: "1편" },
+    { label: "작품 수익", value: "₩0" },
+    { label: "발행한 기록", value: "1편" },
     { label: "만든 작품", value: "1개" },
   ],
 };
