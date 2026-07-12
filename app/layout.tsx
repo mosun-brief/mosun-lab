@@ -45,7 +45,7 @@ export default function RootLayout({
           <div className="wrap footer-inner">
             <span>© {new Date().getFullYear()} 모순책장 · 응급실 밖 실험실</span>
             <span>
-              <a href="https://mosun-brief.vercel.app/" rel="noopener">
+              <a href="https://brief.mosunbrief.kr/" rel="noopener">
                 Mosun Brief
               </a>
             </span>

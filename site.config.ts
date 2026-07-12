@@ -17,26 +17,17 @@ export const channels = [
     name: "네이버 블로그",
     role: "독서 · 서평",
     description: "읽은 책에서 건진 의사결정 프레임들",
-    url: "https://blog.naver.com/CHANGE-ME",
+    url: "https://blog.naver.com/greenapple_98",
   },
   {
     name: "Mosun Brief",
     role: "첫 실험작",
     description: "AI 학습자를 위한 맞춤 브리핑 서비스",
-    url: "https://mosun-brief.vercel.app/",
+    url: "https://brief.mosunbrief.kr/",
   },
-  {
-    name: "인스타그램",
-    role: "일상 기록",
-    description: "실험의 장면들",
-    url: "https://www.instagram.com/CHANGE-ME",
-  },
-  {
-    name: "쓰레드",
-    role: "짧은 생각",
-    description: "일지 사이의 메모",
-    url: "https://www.threads.net/@CHANGE-ME",
-  },
+  // 인스타그램·쓰레드는 계정이 생기면 여기에 추가:
+  // { name: "인스타그램", role: "일상 기록", description: "실험의 장면들", url: "https://www.instagram.com/핸들" },
+  // { name: "쓰레드", role: "짧은 생각", description: "일지 사이의 메모", url: "https://www.threads.net/@핸들" },
 ];
 
 // 공개 지표 — 매달 직접 갱신합니다. 0에서 시작하는 것 자체가 콘텐츠입니다.
