@@ -170,16 +170,25 @@ function renderQuote(eyebrow: string, title: string, footer: string): Rendered {
 function renderMetric(
   eyebrow: string,
   sub: string,
+  ig: string,
   rev: string,
   works: string,
   footer: string
 ): Rendered {
-  const subDisplay = sub ? (/^\d+$/.test(sub) ? `${sub}명` : sub) : "—";
-  const rows = [
-    { value: subDisplay, label: "기록 구독자" },
-    { value: rev || "₩0", label: "작품 수익" },
-    { value: works || "0개", label: "만든 작품" },
-  ];
+  const numDisplay = (v: string) => (/^\d+$/.test(v) ? `${v}명` : v);
+  const subDisplay = sub ? numDisplay(sub) : "—";
+
+  const rows = [{ value: subDisplay, label: "기록 구독자" }];
+  // 인스타 유입 구독자는 기록 구독자의 일부 — 채널 breakdown으로 보여줍니다.
+  if (ig) rows.push({ value: numDisplay(ig), label: "인스타에서 온 구독자" });
+  rows.push({ value: rev || "₩0", label: "작품 수익" });
+  rows.push({ value: works || "0개", label: "만든 작품" });
+
+  // 행이 늘면(4행) 숫자·간격을 줄여 4:5 카드 안에 넉넉히 들어가게 합니다.
+  const dense = rows.length >= 4;
+  const numSize = dense ? 84 : 104;
+  const rowGap = dense ? 30 : 44;
+  const topGap = dense ? 44 : 56;
 
   return {
     text: eyebrow + footer + rows.map((r) => r.value + r.label).join(""),
@@ -189,16 +198,16 @@ function renderMetric(
           {eyebrow}
         </div>
         <PulseLine />
-        <div style={{ display: "flex", flexDirection: "column", marginTop: 56 }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: topGap }}>
           {rows.map((row, index) => (
             <div
               key={index}
-              style={{ display: "flex", flexDirection: "column", marginBottom: 44 }}
+              style={{ display: "flex", flexDirection: "column", marginBottom: rowGap }}
             >
               <div
                 style={{
                   display: "flex",
-                  fontSize: 104,
+                  fontSize: numSize,
                   fontWeight: 700,
                   lineHeight: 1,
                   letterSpacing: "-0.03em",
@@ -282,6 +291,7 @@ export async function GET(request: Request) {
     rendered = renderMetric(
       searchParams.get("eyebrow") ? eyebrow : "공개 지표",
       (searchParams.get("sub") || "").slice(0, 20),
+      (searchParams.get("ig") || "").slice(0, 20),
       (searchParams.get("rev") || "").slice(0, 20),
       (searchParams.get("works") || "").slice(0, 20),
       footer

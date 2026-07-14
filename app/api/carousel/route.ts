@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildCarouselPlan, slideToCardQuery } from "@/lib/carousel";
-import { getLabSubscriberCount } from "@/lib/metrics";
+import { getLabSubscriberCount, getSubscriberCountBySource } from "@/lib/metrics";
 import { getAllPosts } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
@@ -31,8 +31,11 @@ export async function GET(request: Request) {
     );
   }
 
-  const subscriberCount = await getLabSubscriberCount();
-  const plan = buildCarouselPlan(slug, { subscriberCount });
+  const [subscriberCount, instagramCount] = await Promise.all([
+    getLabSubscriberCount(),
+    getSubscriberCountBySource("instagram"),
+  ]);
+  const plan = buildCarouselPlan(slug, { subscriberCount, instagramCount });
 
   if (!plan) {
     return NextResponse.json(

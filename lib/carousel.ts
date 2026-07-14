@@ -27,6 +27,7 @@ export type Slide = {
   title?: string;
   footer?: string;
   sub?: string;
+  ig?: string;
   rev?: string;
   works?: string;
 };
@@ -58,7 +59,7 @@ const DEFAULT_HASHTAGS = [
 
 export function buildCarouselPlan(
   slug: string,
-  opts: { subscriberCount?: number | null } = {}
+  opts: { subscriberCount?: number | null; instagramCount?: number | null } = {}
 ): CarouselPlan | null {
   const raw = getPostRaw(slug);
   if (!raw) return null;
@@ -87,10 +88,12 @@ export function buildCarouselPlan(
   // 3) 지표 — 0에서 시작하는 것 자체가 콘텐츠. 기본 포함.
   if (cfg.metric !== false) {
     const count = opts.subscriberCount;
+    const igCount = opts.instagramCount;
     slides.push({
       kind: "metric",
       eyebrow: "공개 지표",
       sub: count == null ? "" : String(count),
+      ig: igCount == null ? undefined : String(igCount),
       rev: configMetrics.revenue,
       works: configMetrics.works,
       footer: FOOTER,
@@ -128,6 +131,7 @@ export function slideToCardQuery(slide: Slide): string {
   if (slide.title) params.set("title", slide.title);
   if (slide.footer) params.set("footer", slide.footer);
   if (slide.sub !== undefined) params.set("sub", slide.sub);
+  if (slide.ig !== undefined) params.set("ig", slide.ig);
   if (slide.rev !== undefined) params.set("rev", slide.rev);
   if (slide.works !== undefined) params.set("works", slide.works);
   return params.toString();
