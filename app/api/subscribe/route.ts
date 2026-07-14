@@ -25,7 +25,30 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// 요청 쿠키에서 값 하나를 읽습니다. (/ig 가 심는 ref 귀속 쿠키를 읽으려고)
+function readCookie(request: Request, name: string): string | null {
+  const header = request.headers.get("cookie");
+  if (!header) return null;
+
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq === -1) continue;
+    if (part.slice(0, eq).trim() === name) {
+      return decodeURIComponent(part.slice(eq + 1).trim());
+    }
+  }
+  return null;
+}
+
+// 귀속 성공 후 ref 쿠키를 지워, 다음 구독이 잘못 귀속되지 않게 합니다.
+const CLEAR_REF = "ref=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax";
+
 export async function POST(request: Request) {
+  // 인스타 /ig 경유 방문자는 ref=instagram 쿠키를 갖고 옵니다.
+  const ref = readCookie(request, "ref");
+  const newSubscriberSource = ref === "instagram" ? "instagram" : "lab";
+  const successHeaders = ref ? { "Set-Cookie": CLEAR_REF } : undefined;
+
   try {
     let body: { email?: string } = {};
     try {
@@ -86,15 +109,18 @@ export async function POST(request: Request) {
         );
       }
 
-      return NextResponse.json({
-        ok: true,
-        message: "이미 등록된 이메일입니다. 구독이 활성 상태로 유지됩니다.",
-      });
+      return NextResponse.json(
+        {
+          ok: true,
+          message: "이미 등록된 이메일입니다. 구독이 활성 상태로 유지됩니다.",
+        },
+        { headers: successHeaders }
+      );
     }
 
     const { error: insertError } = await supabase.from("subscribers").insert({
       email,
-      signup_source: "lab",
+      signup_source: newSubscriberSource,
       persona_type: "Lab-Follower",
       job_role: null,
       interest_area: "not_sure",
@@ -116,10 +142,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message }, { status: 500 });
     }
 
-    return NextResponse.json({
-      ok: true,
-      message: "구독이 완료되었습니다. 새 기록이 나오면 보내드릴게요.",
-    });
+    return NextResponse.json(
+      {
+        ok: true,
+        message: "구독이 완료되었습니다. 새 기록이 나오면 보내드릴게요.",
+      },
+      { headers: successHeaders }
+    );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown server error";
