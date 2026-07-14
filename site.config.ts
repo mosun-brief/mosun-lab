@@ -30,13 +30,13 @@ export const channels = [
     name: "인스타그램",
     role: "기록 카드",
     description: "기록의 장면들을 카드로",
-    url: "https://www.instagram.com/gree_napple98",
+    url: "https://www.instagram.com/mosun.log",
   },
   {
     name: "쓰레드",
     role: "짧은 생각",
     description: "기록 사이의 메모",
-    url: "https://www.threads.net/@gree_napple98",
+    url: "https://www.threads.net/@mosun.log",
   },
 ];
 

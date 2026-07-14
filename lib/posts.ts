@@ -54,6 +54,33 @@ export function getPost(slug: string): Post | null {
   return { ...meta, html };
 }
 
+export type PostRaw = {
+  meta: PostMeta;
+  body: string;
+  frontmatter: Record<string, unknown>;
+};
+
+// 캐러셀 생성기가 프론트매터 전체(carousel 블록 포함)와 원문 본문을 읽을 때 씁니다.
+export function getPostRaw(slug: string): PostRaw | null {
+  const filePath = path.join(LOG_DIR, `${slug}.md`);
+  if (!fs.existsSync(filePath)) return null;
+
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const { data, content } = matter(raw);
+
+  return {
+    meta: {
+      slug,
+      no: Number(data.no) || 0,
+      title: String(data.title || slug),
+      date: String(data.date || ""),
+      summary: String(data.summary || ""),
+    },
+    body: content,
+    frontmatter: data as Record<string, unknown>,
+  };
+}
+
 export function formatLogNo(no: number) {
   return `LOG ${String(no).padStart(3, "0")}`;
 }

@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# 인스타그램 카드 초안 (build-carousel.mjs 출력물)
+/carousel-out/
+
 # production
 /build
 
