@@ -1,8 +1,10 @@
 // 인스타그램 캐러셀 한 벌을 폴더로 내려받습니다.
 //
 //   npm run carousel -- 1                 (LOG 001, dev 서버 http://localhost:3000)
-//   npm run carousel -- 1 --base https://mosunbrief.kr
+//   npm run carousel -- 1 --base https://www.mosunbrief.kr
 //   npm run carousel -- 001-experiment-rules
+//   npm run carousel -- --book 1          (책장 001 — content/book)
+//   npm run carousel -- --book 001-ai-bias --base https://www.mosunbrief.kr
 //
 // 결과: carousel-out/<slug>/01-hook.png ... + caption.txt
 // dev 서버(npm run dev)나 배포본이 떠 있어야 카드가 렌더됩니다.
@@ -11,13 +13,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 function parseArgs(argv) {
-  const args = { base: "http://localhost:3000", target: null };
+  const args = { base: "http://localhost:3000", target: null, book: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--base") {
       args.base = argv[++i];
     } else if (a.startsWith("--base=")) {
       args.base = a.slice("--base=".length);
+    } else if (a === "--book") {
+      args.book = true;
     } else if (!args.target) {
       args.target = a;
     }
@@ -26,15 +30,21 @@ function parseArgs(argv) {
 }
 
 async function main() {
-  const { base, target } = parseArgs(process.argv.slice(2));
+  const { base, target, book } = parseArgs(process.argv.slice(2));
 
   if (!target) {
-    console.error("사용법: npm run carousel -- <로그번호|slug> [--base URL]");
+    console.error(
+      "사용법: npm run carousel -- <로그번호|slug> [--book] [--base URL]"
+    );
     process.exit(1);
   }
 
   const isNumber = /^\d+$/.test(target);
-  const query = isNumber ? `no=${Number(target)}` : `slug=${encodeURIComponent(target)}`;
+  const query = book
+    ? `book=${encodeURIComponent(target)}`
+    : isNumber
+    ? `no=${Number(target)}`
+    : `slug=${encodeURIComponent(target)}`;
   const planUrl = `${base.replace(/\/$/, "")}/api/carousel?${query}`;
 
   console.log(`계획 요청: ${planUrl}`);
@@ -51,7 +61,10 @@ async function main() {
   const outDir = path.join(process.cwd(), "carousel-out", plan.slug);
   await fs.mkdir(outDir, { recursive: true });
 
-  console.log(`LOG ${String(plan.no).padStart(3, "0")} — 슬라이드 ${plan.count}장`);
+  const seriesLabel = book ? "책장" : "LOG";
+  console.log(
+    `${seriesLabel} ${String(plan.no).padStart(3, "0")} — 슬라이드 ${plan.count}장`
+  );
 
   for (const slide of plan.slides) {
     const imgRes = await fetch(slide.url);

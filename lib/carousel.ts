@@ -1,3 +1,4 @@
+import { formatBookNo, getBookRaw } from "./books";
 import { formatLogNo, getPostRaw } from "./posts";
 import { metrics as configMetrics } from "@/site.config";
 
@@ -19,12 +20,13 @@ import { metrics as configMetrics } from "@/site.config";
 //     caption: "...직접 쓴 캡션..."
 //     hashtags: ["#1인기업", "#빌드인퍼블릭"]
 
-export type SlideKind = "hook" | "quote" | "metric" | "cta";
+export type SlideKind = "hook" | "quote" | "book" | "metric" | "cta";
 
 export type Slide = {
   kind: SlideKind;
   eyebrow?: string;
   title?: string;
+  author?: string;
   footer?: string;
   sub?: string;
   ig?: string;
@@ -123,12 +125,107 @@ export function buildCarouselPlan(
   return { slug, no: meta.no, caption, slides };
 }
 
+// 책장(서평) 캐러셀 — content/book/*.md 한 편을 슬라이드 + 캡션으로.
+//
+// 프론트매터 예:
+//   no: 1
+//   book: "AI조차 편향에서|벗어나지 못한다"   ('|' 로 카드 줄바꿈)
+//   author: "구리야마 나오코"
+//   publisher: "웨일북스"
+//   summary: "..."
+//   carousel:
+//     hook: "..."          # 둘째 장(질문/선언). 없으면 생략
+//     slides: [...]        # 인용/프레임 카드들
+//     metric: true         # 지표 카드는 책장에선 기본 제외(명시할 때만)
+//     cta: "..."
+//     caption: |
+//       ...직접 쓴 캡션...
+//     hashtags: [...]
+//
+// 큰 그림: 책장 카드는 신뢰 지층 — 책에서 프레임을 꺼내고, AI로 검증하고,
+// 프로필 링크(mosunbrief.kr 허브)로 보냅니다. 서평 전문은 네이버 블로그.
+
+const BOOK_HASHTAGS = ["#서평", "#책추천", "#독서스타그램", "#모순책장"];
+
+export function buildBookCarouselPlan(
+  slug: string,
+  opts: { subscriberCount?: number | null; instagramCount?: number | null } = {}
+): CarouselPlan | null {
+  const raw = getBookRaw(slug);
+  if (!raw) return null;
+
+  const { meta, frontmatter } = raw;
+  const cfg = ((frontmatter.carousel as CarouselFrontmatter | undefined) ??
+    {}) as CarouselFrontmatter;
+  const bookNo = formatBookNo(meta.no);
+  const authorLine = [meta.author, meta.publisher].filter(Boolean).join(" · ");
+  const plainBook = meta.book.split("|").join(" ").trim();
+
+  const slides: Slide[] = [];
+
+  // 1) 책 표지 카드 — 책장 시리즈의 시그니처 첫 장.
+  slides.push({
+    kind: "book",
+    eyebrow: bookNo,
+    title: meta.book,
+    author: authorLine,
+    footer: FOOTER,
+  });
+
+  // 2) 훅 — 질문/선언 한 장.
+  if (cfg.hook?.trim()) {
+    slides.push({ kind: "hook", eyebrow: bookNo, title: cfg.hook, footer: FOOTER });
+  }
+
+  // 3) 프레임·인용 카드들.
+  for (const line of cfg.slides ?? []) {
+    if (!line?.trim()) continue;
+    slides.push({ kind: "quote", eyebrow: bookNo, title: line, footer: FOOTER });
+  }
+
+  // 4) 지표 — 책장 캐러셀에선 기본 제외(빌드인퍼블릭 숫자는 LOG의 몫).
+  if (cfg.metric === true) {
+    slides.push({
+      kind: "metric",
+      eyebrow: "공개 지표",
+      sub: opts.subscriberCount == null ? "" : String(opts.subscriberCount),
+      ig: opts.instagramCount == null ? undefined : String(opts.instagramCount),
+      rev: configMetrics.revenue,
+      works: configMetrics.works,
+      footer: FOOTER,
+    });
+  }
+
+  // 5) CTA — 서평 전문(블로그)과 기록(허브)으로 가는 깔때기.
+  slides.push({
+    kind: "cta",
+    eyebrow: "전체 서평과 검증 노트는",
+    title: cfg.cta || "프로필 링크에서|서평 전체를 읽어보세요.",
+    footer: "mosunbrief.kr",
+  });
+
+  const caption =
+    cfg.caption ||
+    [
+      `${bookNo} · ${plainBook} — ${meta.author}`,
+      "",
+      meta.summary,
+      "",
+      "전체 서평은 네이버 블로그(모순책장)에, AI와 함께 1인 회사를 만드는 기록은 프로필 링크 mosunbrief.kr 에 있습니다.",
+      "",
+      (cfg.hashtags ?? BOOK_HASHTAGS).join(" "),
+    ].join("\n");
+
+  return { slug, no: meta.no, caption, slides };
+}
+
 // 슬라이드 하나를 /api/card 쿼리스트링으로 바꿉니다.
 export function slideToCardQuery(slide: Slide): string {
   const params = new URLSearchParams();
   params.set("kind", slide.kind);
   if (slide.eyebrow) params.set("eyebrow", slide.eyebrow);
   if (slide.title) params.set("title", slide.title);
+  if (slide.author) params.set("author", slide.author);
   if (slide.footer) params.set("footer", slide.footer);
   if (slide.sub !== undefined) params.set("sub", slide.sub);
   if (slide.ig !== undefined) params.set("ig", slide.ig);

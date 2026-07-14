@@ -5,7 +5,8 @@ import { ImageResponse } from "next/og";
 // 공통 파라미터: eyebrow, footer, kind
 //  - kind=hook   (기본): 큰 선언 문장. title='|' 로 줄바꿈.
 //  - kind=quote  : 본문에서 뽑은 인용/한 문장. title='|' 로 줄바꿈.
-//  - kind=metric : 공개 지표 3종. sub(구독자 수), rev(수익), works(작품 수).
+//  - kind=book   : 책장 캐러셀 첫 장. title(책 제목), author(저자 · 출판사).
+//  - kind=metric : 공개 지표. sub(구독자), ig(인스타 유입), rev(수익), works(작품 수).
 //  - kind=cta    : 마지막 카드. title(행동유도 문구), footer(도메인)로 알약 버튼.
 //
 // 예) /api/card?eyebrow=LOG 001&title=첫 줄|둘째 줄&footer=모순책장 — mosunbrief.kr
@@ -114,6 +115,61 @@ function renderHook(eyebrow: string, title: string, footer: string): Rendered {
           {lines.map((line, index) => (
             <span key={index}>{line}</span>
           ))}
+        </div>
+        <div style={{ display: "flex", marginTop: 80, fontSize: 30, color: MUTED }}>
+          {footer}
+        </div>
+      </div>
+    ),
+  };
+}
+
+// 책장 캐러셀의 첫 장 — 책등을 연상시키는 클레이 세로선 + 책 제목 + 저자.
+function renderBook(
+  eyebrow: string,
+  title: string,
+  author: string,
+  footer: string
+): Rendered {
+  const lines = title.split("|").map((line) => line.trim());
+  const fontSize = autoFontSize(lines, WIDTH - 150 * 2 - 52, 40, 64);
+
+  return {
+    text: eyebrow + lines.join("") + author + footer,
+    node: frame(
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", fontSize: 31, color: CLAY_DARK, marginBottom: 40 }}>
+          {eyebrow}
+        </div>
+        <PulseLine />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginTop: 56,
+            borderLeft: `8px solid ${CLAY}`,
+            paddingLeft: 44,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize,
+              fontWeight: 700,
+              lineHeight: 1.5,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {lines.map((line, index) => (
+              <span key={index}>{line}</span>
+            ))}
+          </div>
+          {author ? (
+            <div style={{ display: "flex", marginTop: 28, fontSize: 30, color: MUTED }}>
+              {author}
+            </div>
+          ) : null}
         </div>
         <div style={{ display: "flex", marginTop: 80, fontSize: 30, color: MUTED }}>
           {footer}
@@ -302,7 +358,10 @@ export async function GET(request: Request) {
       "응급실에서는 환자를 봅니다.|응급실 밖에서는 AI와 함께 회사를 만들어 나갑니다."
     ).slice(0, 240);
 
-    if (kind === "quote") {
+    if (kind === "book") {
+      const author = (searchParams.get("author") || "").slice(0, 60);
+      rendered = renderBook(eyebrow, title, author, footer);
+    } else if (kind === "quote") {
       rendered = renderQuote(eyebrow, title, footer);
     } else if (kind === "cta") {
       rendered = renderCta(eyebrow, title, footer);
