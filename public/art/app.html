@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 미술 노트 — 그림이 읽히는 눈</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="index.html">그림이 읽히는 눈</a>
+  <span></span>
+  <span class="demo-badge">프로토타입</span>
+</div>
+
+<div class="dash">
+
+  <div class="dash-hero">
+    <h1>나의 미술 노트</h1>
+    <div class="dim" id="dashSub"></div>
+    <div class="progress-wrap">
+      <div class="progress-bar-lg"><div class="fill" id="dashFill"></div></div>
+      <div class="progress-label" id="dashLabel"></div>
+    </div>
+  </div>
+
+  <div id="sessionList"></div>
+
+  <div class="card">
+    <h3>🕵️ 힌트 수첩</h3>
+    <div class="sub">코치가 당신만을 위해 골라둔 그림 한 점. 세션을 마칠 때마다 힌트가 열립니다.</div>
+    <div class="hint-list" id="hintList"></div>
+  </div>
+
+  <div class="card" id="revealCard" style="display:none">
+    <h3>🎁 나의 그림</h3>
+    <div class="sub">코치의 공개 편지가 도착했습니다.</div>
+    <img id="revealImg" style="width:100%; border-radius:10px; margin-bottom:14px" alt="나의 그림">
+    <div id="revealTitle" style="font-family:var(--serif); font-size:19px; margin-bottom:2px"></div>
+    <div id="revealMeta" class="sub"></div>
+    <div id="revealLetter" style="font-size:15px; line-height:1.95; white-space:pre-wrap"></div>
+  </div>
+
+  <div class="card" id="guessCard">
+    <h3>🔍 당신의 그림 — 추리</h3>
+    <div class="sub" id="guessSub"></div>
+    <div id="guessForm" style="display:none">
+      <textarea id="guessInput" placeholder="① 화가와 작품명 (정확하지 않아도, 묘사로도 좋습니다)&#10;② 그렇게 추리한 근거 — 어떤 힌트가 결정적이었나요?"></textarea>
+      <button class="btn" id="saveGuessBtn">추리 제출</button>
+    </div>
+    <div id="guessDone" style="display:none">
+      <p style="font-size:14.5px; line-height:1.8;" id="guessShown"></p>
+      <p class="sub" style="margin-top:12px">추리가 제출되었습니다. 최종 미션(전시회)을 다녀오면, 코치의 공개 편지가 이 자리에 도착합니다. 🎁</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📄 내보내기</h3>
+    <div class="sub">지금까지의 기록(메모 + 힌트 + 추리)을 마크다운 파일 하나로 내려받습니다. 4주의 여정이 파일 하나로 남습니다.</div>
+    <button class="btn ghost" onclick="downloadMarkdown()">마크다운으로 내보내기</button>
+  </div>
+
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="data/course.js"></script>
+<script src="app.js"></script>
+<script type="module">
+await Store.init();
+const done = Store.doneCount();
+
+// ── 헤더 & 진도 ──
+const name = Store.studentName();
+if (name) document.querySelector(".dash-hero h1").textContent = `${name}님의 미술 노트`;
+document.getElementById("dashFill").style.width = (done / 12 * 100) + "%";
+document.getElementById("dashLabel").textContent = `${done} / 12 세션 · 힌트 ${done}개 수집`;
+document.getElementById("dashSub").textContent =
+  done === 0 ? "여정의 시작입니다. 첫 세션이 기다리고 있어요."
+  : done < 12 ? "차곡차곡 쌓이고 있습니다."
+  : "12세션 완주! 이제 추리와 최종 미션만 남았습니다.";
+
+// ── 세션 목록 ──
+const listEl = document.getElementById("sessionList");
+const weekNames = { 1: "1주차 — 그림을 '읽는' 법", 2: "2주차 — 규칙의 시대", 3: "3주차 — 반란의 시대", 4: "4주차 — \"이게 왜 예술이야?\"" };
+let currentAssigned = false;
+let html = "";
+let lastWeek = 0;
+for (const s of COURSE) {
+  if (s.week !== lastWeek) {
+    html += `<div class="week-label">${weekNames[s.week]}</div>`;
+    lastWeek = s.week;
+  }
+  const isDone = Store.isDone(s.id);
+  const unlocked = Store.isUnlocked(s.id);
+  const isCurrent = !isDone && unlocked && !currentAssigned;
+  if (isCurrent) currentAssigned = true;
+  const status = isDone ? "✅" : unlocked ? "▶" : "🔒";
+  const cls = "session-item" + (unlocked ? "" : " locked") + (isCurrent ? " current" : "");
+  const go = isDone ? "다시 보기" : isCurrent ? "오늘의 세션 →" : unlocked ? "시작하기" : "";
+  html += `<a class="${cls}" href="session.html?s=${s.id}" style="margin-top:14px">
+    <span class="status">${status}</span>
+    <span class="info">
+      <div class="num">SESSION ${s.id}${s.draft ? " · 초안" : ""}${isDone ? " · " + Store.doneDate(s.id) : ""}</div>
+      <div class="name">${s.title}</div>
+    </span>
+    <span class="go">${go}</span>
+  </a>`;
+}
+listEl.innerHTML = html;
+
+// ── 힌트 수첩 ──
+let hintHtml = "";
+for (let i = 1; i <= 12; i++) {
+  const open = Store.hintUnlocked(i);
+  const h = open ? Store.getHint(i) : null;
+  hintHtml += `<div class="hint-item${h ? "" : " locked-h"}">
+    <span class="n">${i}</span>
+    <span class="t">${h ? '"' + h + '"' : "세션 " + i + "을 마치면 열립니다"}</span>
+  </div>`;
+}
+document.getElementById("hintList").innerHTML = hintHtml;
+
+// ── 나의 그림 (공개 편지) ──
+const letter = Store.getLetter();
+if (letter) {
+  const art = Store.getArtwork() || {};
+  document.getElementById("revealCard").style.display = "block";
+  const img = document.getElementById("revealImg");
+  if (art.image_url) img.src = art.image_url; else img.style.display = "none";
+  document.getElementById("revealTitle").textContent = art.title ? `「${art.title}」` : "";
+  document.getElementById("revealMeta").textContent = art.meta || "";
+  document.getElementById("revealLetter").textContent = letter;
+}
+
+// ── 추리 카드 ──
+const guessSub = document.getElementById("guessSub");
+const savedGuess = Store.getGuess();
+if (savedGuess) {
+  guessSub.textContent = "제출된 추리:";
+  document.getElementById("guessDone").style.display = "block";
+  document.getElementById("guessShown").textContent = savedGuess;
+} else if (done >= 12) {
+  guessSub.textContent = "힌트 12개가 모두 모였습니다. 당신의 그림은 무엇일까요?";
+  document.getElementById("guessForm").style.display = "block";
+} else {
+  guessSub.textContent = `힌트 12개가 모두 모이면 추리를 제출할 수 있습니다. (현재 ${done}/12)`;
+}
+document.getElementById("saveGuessBtn")?.addEventListener("click", async () => {
+  const v = document.getElementById("guessInput").value.trim();
+  if (!v) { showToast("추리를 먼저 적어주세요 🔍"); return; }
+  try {
+    await Store.saveGuess(v);
+  } catch (e) {
+    showToast(e.message);
+    return;
+  }
+  location.reload();
+});
+</script>
+</body>
+</html>

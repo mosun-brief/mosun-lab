@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세션 — 그림이 읽히는 눈</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="progressTrack"><div id="progressFill"></div></div>
+<div class="topbar">
+  <a class="brand" href="app.html">그림이 읽히는 눈</a>
+  <span id="topLabel"></span>
+  <span class="demo-badge">프로토타입</span>
+</div>
+
+<section class="hero">
+  <div class="session-label" id="heroLabel"></div>
+  <h1 id="heroTitle"></h1>
+  <p id="heroDesc"></p>
+  <div class="session-plan">
+    <span>📖 <b>전반전 15분</b> — 읽고, 확대하고, 관찰하기</span>
+    <span>🤖 <b>후반전 15분</b> — 당신의 AI와 대화하기</span>
+  </div>
+  <div class="scroll-cue">↓ 천천히 스크롤하세요</div>
+</section>
+
+<div class="scrolly">
+  <div class="artpane">
+    <div class="artstage" id="artstage" title="탭하면 확대됩니다"></div>
+    <div class="artcaption">
+      <span class="title" id="capTitle"></span>
+      <span id="capMeta"></span>
+      <span class="zoomhint">🔍 탭하여 확대</span>
+    </div>
+  </div>
+  <div class="textpane" id="textpane"></div>
+</div>
+
+<div class="after">
+
+  <div class="card">
+    <h3>📓 오늘의 기록</h3>
+    <div class="sub">오늘 세션에서 남기고 싶은 것을 적어주세요. 세 줄이면 충분합니다. 이 기록이 쌓여 4주 뒤 당신만의 미술 노트가 됩니다.</div>
+    <textarea id="memoInput"></textarea>
+    <button class="btn" id="saveMemoBtn">기록 저장하고 힌트 받기</button>
+  </div>
+
+  <div class="card" id="hintCard">
+    <h3 id="hintTitle">🕵️ 당신의 그림 — 힌트</h3>
+    <div id="hintLocked">
+      <span class="lock">🔒</span>
+      <span>코치가 당신만을 위한 그림 한 점을 골라두었습니다.<br>위에 오늘의 기록을 저장하면 힌트가 열립니다.</span>
+    </div>
+    <div id="hintRevealed">
+      <div class="hint-text" id="hintText"></div>
+      <div class="hint-count" id="hintCount"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🤖 후반전 — 이제 당신의 AI와 함께</h3>
+    <div class="sub">여기까지가 전반전입니다. 세션의 나머지 절반은 대화예요 — 아래 프롬프트를 당신의 AI(ChatGPT, Claude 등)에 붙여넣으면, 이해 확인부터 실전 연습까지 약 15분의 후반전이 시작됩니다. 끝나면 돌아와서 오늘의 기록을 남겨주세요.</div>
+    <pre class="prompt" id="aiPrompt"></pre>
+    <div class="btn-row">
+      <button class="btn" id="copyPromptBtn">프롬프트 복사</button>
+    </div>
+  </div>
+
+  <div class="card" id="quizCard" style="display:none">
+    <h3>📝 이번 주 복습 퀴즈</h3>
+    <div class="sub">한 주를 마쳤습니다. AI에게 이 프롬프트를 붙여넣으면 이번 주 복습 퀴즈가 시작됩니다.</div>
+    <pre class="prompt" id="quizPrompt"></pre>
+    <div class="btn-row">
+      <button class="btn ghost" id="copyQuizBtn">퀴즈 프롬프트 복사</button>
+    </div>
+  </div>
+
+  <div class="next-teaser" id="nextTeaser"></div>
+  <div class="center">
+    <a class="btn ghost" href="app.html">← 대시보드로</a>
+    <a class="btn" id="nextBtn" style="display:none">다음 세션으로 →</a>
+  </div>
+
+</div>
+
+<div id="lightbox">
+  <img id="lbImg" src="" alt="">
+  <button id="lbClose">✕</button>
+  <div id="lbHint">휠/핀치로 확대 · 드래그로 이동</div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="data/course.js"></script>
+<script src="app.js"></script>
+<script type="module">
+// ── 세션 로드 & 접근 제어 ──
+await Store.init();
+const sid = parseInt(new URLSearchParams(location.search).get("s") || "1", 10);
+const S = COURSE.find(c => c.id === sid);
+if (!S) location.replace("app.html");
+if (!Store.isUnlocked(sid)) location.replace("app.html");
+
+document.title = `세션 ${S.id} · ${S.title} — 그림이 읽히는 눈`;
+document.getElementById("topLabel").textContent = `세션 ${S.id} / 12`;
+document.getElementById("heroLabel").textContent = `SESSION ${S.id} · WEEK ${S.week}`;
+document.getElementById("heroTitle").innerHTML = S.heroTitle;
+document.getElementById("heroDesc").textContent = S.heroDesc;
+
+// ── 스텝 & 그림 렌더링 ──
+const stage = document.getElementById("artstage");
+const textpane = document.getElementById("textpane");
+const artByKey = new Map();   // src → {art, imgEl}
+let currentKey = null;
+
+S.steps.forEach((step, i) => {
+  const key = "a" + i;
+  // 같은 그림을 여러 스텝이 쓰면 재사용
+  let entry = [...artByKey.values()].find(e => e.art.src === step.art.src);
+  if (!entry) {
+    const img = document.createElement("img");
+    img.src = step.art.src;
+    img.alt = step.art.title;
+    img.dataset.key = key;
+    img.onerror = () => { img.src = A.tbd.src; };
+    stage.appendChild(img);
+    entry = { art: step.art, key };
+    artByKey.set(key, entry);
+  }
+  step._artKey = entry.key;
+
+  const sec = document.createElement("section");
+  sec.className = "step";
+  sec.dataset.art = entry.key;
+  sec.innerHTML =
+    (S.draft ? '<span class="draft-note">✏️ 초안 — 콘텐츠 보충 예정</span><br>' : "") +
+    `<div class="tool-num">${step.label}</div>` +
+    `<h2>${step.heading}</h2>` +
+    step.paras.map(p => `<p>${p}</p>`).join("") +
+    (step.tip ? `<div class="try"><b>직접 해보기</b> — ${step.tip}</div>` : "");
+  textpane.appendChild(sec);
+});
+
+function setArt(key) {
+  if (key === currentKey || !artByKey.has(key)) return;
+  currentKey = key;
+  stage.querySelectorAll("img").forEach(img => {
+    img.classList.toggle("active", img.dataset.key === key);
+  });
+  const art = artByKey.get(key).art;
+  document.getElementById("capTitle").textContent = "「" + art.title + "」";
+  document.getElementById("capMeta").textContent = art.meta;
+}
+
+// 뷰포트 중앙에 가장 가까운 섹션의 그림을 활성화
+const steps = [...document.querySelectorAll(".step")];
+function updateActiveArt() {
+  const mid = innerHeight / 2;
+  let best = null, bestDist = Infinity;
+  for (const s of steps) {
+    const r = s.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) continue;
+    const d = Math.abs((r.top + r.bottom) / 2 - mid);
+    if (d < bestDist) { bestDist = d; best = s; }
+  }
+  if (best) setArt(best.dataset.art);
+}
+const fill = document.getElementById("progressFill");
+let ticking = false;
+function onScroll() {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    const h = document.documentElement;
+    fill.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
+    updateActiveArt();
+    ticking = false;
+  });
+}
+addEventListener("scroll", onScroll, { passive: true });
+addEventListener("resize", onScroll, { passive: true });
+setArt(S.steps[0]._artKey);
+updateActiveArt();
+
+// ── 라이트박스 ──
+const lb = document.getElementById("lightbox");
+const lbImg = document.getElementById("lbImg");
+let scale = 1, tx = 0, ty = 0, dragging = false, lastX = 0, lastY = 0, pinchDist = 0;
+function applyTransform() { lbImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`; }
+stage.addEventListener("click", () => {
+  if (!currentKey) return;
+  const art = artByKey.get(currentKey).art;
+  lbImg.src = art.src.replace("width=1400", "width=2400");
+  lb.classList.add("open");
+  lbImg.onload = () => {
+    scale = Math.min(innerWidth / lbImg.naturalWidth, innerHeight / lbImg.naturalHeight) * 0.95;
+    tx = (innerWidth - lbImg.naturalWidth * scale) / 2;
+    ty = (innerHeight - lbImg.naturalHeight * scale) / 2;
+    applyTransform();
+  };
+});
+document.getElementById("lbClose").addEventListener("click", e => { e.stopPropagation(); lb.classList.remove("open"); });
+lb.addEventListener("wheel", e => {
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 1.15 : 0.87;
+  tx = e.clientX - (e.clientX - tx) * f;
+  ty = e.clientY - (e.clientY - ty) * f;
+  scale *= f;
+  applyTransform();
+}, { passive: false });
+lb.addEventListener("pointerdown", e => { dragging = true; lastX = e.clientX; lastY = e.clientY; lb.setPointerCapture(e.pointerId); });
+lb.addEventListener("pointermove", e => {
+  if (!dragging) return;
+  tx += e.clientX - lastX; ty += e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  applyTransform();
+});
+lb.addEventListener("pointerup", () => dragging = false);
+lb.addEventListener("touchmove", e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    if (pinchDist > 0) {
+      const f = d / pinchDist;
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      tx = cx - (cx - tx) * f;
+      ty = cy - (cy - ty) * f;
+      scale *= f;
+      applyTransform();
+    }
+    pinchDist = d;
+  }
+}, { passive: false });
+lb.addEventListener("touchend", () => pinchDist = 0);
+
+// ── 기록 → 힌트 ──
+const memoInput = document.getElementById("memoInput");
+memoInput.placeholder = S.memoPlaceholder || "오늘 남기고 싶은 것을 적어주세요.";
+memoInput.value = Store.getMemo(sid);
+document.getElementById("hintTitle").textContent = `🕵️ 당신의 그림 — 힌트 ${sid}/12`;
+
+function refreshHintUI() {
+  const done = Store.isDone(sid);
+  const h = Store.getHint(sid);
+  if (done && h) document.getElementById("hintText").innerHTML = `"${h}"`;
+  document.getElementById("hintLocked").style.display = done ? "none" : "flex";
+  document.getElementById("hintRevealed").classList.toggle("show", done);
+  const total = Store.doneCount();
+  document.getElementById("hintCount").textContent =
+    total >= 12
+      ? "힌트 12개 완성 — 대시보드에서 추리를 제출할 수 있습니다!"
+      : `힌트 ${total}개 수집 · ${12 - total}개 남음`;
+  const next = COURSE.find(c => c.id === sid + 1);
+  const nextBtn = document.getElementById("nextBtn");
+  if (next && done) {
+    nextBtn.style.display = "inline-block";
+    nextBtn.href = `session.html?s=${next.id}`;
+  }
+}
+refreshHintUI();
+
+document.getElementById("saveMemoBtn").addEventListener("click", async () => {
+  const v = memoInput.value.trim();
+  if (!v) { showToast("기록을 먼저 적어주세요 ✍️"); memoInput.focus(); return; }
+  const first = !Store.isDone(sid);
+  try {
+    await Store.saveMemo(sid, v);
+  } catch (e) {
+    showToast(e.message);
+    return;
+  }
+  refreshHintUI();
+  showToast(first ? "기록 저장 완료 — 힌트가 열렸습니다 🎁" : "기록이 수정되었습니다");
+  if (first) document.getElementById("hintCard").scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+// ── 프롬프트 카드 ──
+document.getElementById("aiPrompt").textContent = S.aiPrompt;
+document.getElementById("copyPromptBtn").addEventListener("click", () =>
+  copyText(S.aiPrompt, "프롬프트 복사 완료 — AI에게 붙여넣으세요"));
+if (S.quizPrompt) {
+  document.getElementById("quizCard").style.display = "block";
+  document.getElementById("quizPrompt").textContent = S.quizPrompt;
+  document.getElementById("copyQuizBtn").addEventListener("click", () =>
+    copyText(S.quizPrompt, "퀴즈 프롬프트 복사 완료"));
+}
+
+// ── 다음 세션 예고 ──
+const next = COURSE.find(c => c.id === sid + 1);
+document.getElementById("nextTeaser").innerHTML = next
+  ? `다음 세션 — <b>세션 ${next.id}. ${next.title}</b>`
+  : `12세션을 모두 마쳤습니다 — <b>대시보드에서 당신의 그림을 추리하세요</b> 🕵️`;
+</script>
+</body>
+</html>

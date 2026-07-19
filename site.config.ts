@@ -22,9 +22,15 @@ export const channels = [
   },
   {
     name: "Mosun Brief",
-    role: "첫 작품",
+    role: "첫 번째 작품",
     description: "AI 학습자를 위한 맞춤 브리핑 서비스",
     url: "https://brief.mosunbrief.kr/",
+  },
+  {
+    name: "그림이 읽히는 눈",
+    role: "두 번째 작품",
+    description: "AI와 함께하는 4주 미술 감상 코스 — 4주 뒤, 당신의 그림을 만납니다",
+    url: "https://www.mosunbrief.kr/art",
   },
   {
     name: "인스타그램",
@@ -33,7 +39,7 @@ export const channels = [
     url: "https://www.instagram.com/mosun.log",
   },
   {
-    name: "쓰레드",
+    name: "Threads",
     role: "짧은 생각",
     description: "기록 사이의 메모",
     url: "https://www.threads.net/@mosun.log",
