@@ -12,7 +12,6 @@
 <div class="topbar">
   <a class="brand" href="app.html">그림이 읽히는 눈</a>
   <span id="topLabel"></span>
-  <span class="demo-badge">프로토타입</span>
 </div>
 
 <section class="hero">
@@ -51,7 +50,7 @@
     <h3 id="hintTitle">🕵️ 당신의 그림 — 힌트</h3>
     <div id="hintLocked">
       <span class="lock">🔒</span>
-      <span>코치가 당신만을 위한 그림 한 점을 골라두었습니다.<br>위에 오늘의 기록을 저장하면 힌트가 열립니다.</span>
+      <span>큐레이터가 당신만을 위한 그림 한 점을 골라두었습니다.<br>위에 오늘의 기록을 저장하면 힌트가 열립니다.</span>
     </div>
     <div id="hintRevealed">
       <div class="hint-text" id="hintText"></div>
@@ -251,7 +250,7 @@ function refreshHintUI() {
     // 무료 체험: 힌트 대신 예고
     document.getElementById("hintLocked").innerHTML =
       `<span class="lock">🎁</span>
-      <span>정식 수강생에게는 이 자리에 <b style="color:var(--accent)">코치가 비밀리에 고른
+      <span>정식 수강생에게는 이 자리에 <b style="color:var(--accent)">큐레이터가 비밀리에 고른
       당신만의 그림</b>의 첫 힌트가 도착합니다.<br>
       세션마다 하나씩, 12개가 모이면 추리가 시작됩니다.</span>`;
     if (done) {

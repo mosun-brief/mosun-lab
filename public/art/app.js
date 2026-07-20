@@ -28,7 +28,7 @@ const Store = {
         localStorage.setItem("artcourse_token", token);
       } catch (e) {
         console.warn("원격 모드 진입 실패 — 로컬 모드로 진행합니다:", e.message);
-        if (fromUrl) showToast("링크가 유효하지 않습니다 — 코치에게 문의해주세요");
+        if (fromUrl) showToast("링크가 유효하지 않습니다 — 큐레이터에게 문의해주세요");
       }
     }
   },
@@ -129,7 +129,7 @@ const Store = {
       const art = this.getArtwork() || {};
       md += `\n## 🎁 나의 그림${art.title ? " — 「" + art.title + "」" : ""}\n`;
       if (art.meta) md += `\n${art.meta}\n`;
-      md += `\n### 코치의 편지\n\n${letter}\n`;
+      md += `\n### 큐레이터의 편지\n\n${letter}\n`;
     }
     return md;
   }
