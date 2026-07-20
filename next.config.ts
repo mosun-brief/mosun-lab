@@ -5,7 +5,7 @@ import type { NextConfig } from "next";
 // 'unsafe-eval'은 개발 모드에서만 허용 — React dev 도구가 eval을 요구하며,
 // 프로덕션에서는 React가 eval을 쓰지 않으므로 프로덕션 CSP는 그대로 엄격합니다.
 const isDev = process.env.NODE_ENV === "development";
-const contentSecurityPolicy = [
+const cspDirectives = [
   "default-src 'self'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
@@ -16,10 +16,16 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "connect-src 'self' https://*.supabase.co",
-].join("; ");
+];
 
-const securityHeaders = [
-  { key: "Content-Security-Policy", value: contentSecurityPolicy },
+// /art(그림이 읽히는 눈)에서만 구글 웹폰트 허용 — 본 사이트 CSP는 그대로 유지
+const artCspDirectives = cspDirectives.map((d) =>
+  d.startsWith("style-src") ? `${d} https://fonts.googleapis.com`
+  : d.startsWith("font-src") ? `${d} https://fonts.gstatic.com`
+  : d
+);
+
+const baseHeaders = [
   {
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains",
@@ -33,13 +39,26 @@ const securityHeaders = [
   },
 ];
 
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: cspDirectives.join("; ") },
+  ...baseHeaders,
+];
+const artSecurityHeaders = [
+  { key: "Content-Security-Policy", value: artCspDirectives.join("; ") },
+  ...baseHeaders,
+];
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
+      // /art를 제외한 모든 경로 — 기존의 엄격한 CSP
       {
-        source: "/:path*",
+        source: "/((?!art).*)",
         headers: securityHeaders,
       },
+      // /art — 웹폰트만 추가 허용된 CSP
+      { source: "/art", headers: artSecurityHeaders },
+      { source: "/art/:path*", headers: artSecurityHeaders },
     ];
   },
   // 두 번째 작품 '그림이 읽히는 눈' — public/art의 정적 사이트로 연결
