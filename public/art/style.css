@@ -101,7 +101,8 @@ pre.prompt {
 .scrolly { position: relative; }
 .artpane {
   position: sticky; top: 0; z-index: 10;
-  height: 44vh; background: #0d0c0a;
+  height: 46vh; background: #0d0c0a;
+  padding-top: 50px; /* 고정 상단바가 그림을 가리지 않도록 */
   display: flex; flex-direction: column;
   border-bottom: 1px solid var(--line);
 }
@@ -218,7 +219,7 @@ pre.prompt {
 /* ── 데스크톱 ── */
 @media (min-width: 900px) {
   .scrolly { display: grid; grid-template-columns: 1fr 1fr; }
-  .artpane { height: 100vh; top: 0; border-bottom: none; border-right: 1px solid var(--line); }
+  .artpane { height: 100vh; top: 0; padding-top: 0; border-bottom: none; border-right: 1px solid var(--line); }
   .artstage img { padding: 40px 40px 20px; }
   .textpane .step { padding: 42vh 48px; max-width: 560px; }
   .textpane .step:first-child { padding-top: 30vh; }
