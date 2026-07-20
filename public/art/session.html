@@ -239,10 +239,29 @@ lb.addEventListener("touchend", () => pinchDist = 0);
 const memoInput = document.getElementById("memoInput");
 memoInput.placeholder = S.memoPlaceholder || "오늘 남기고 싶은 것을 적어주세요.";
 memoInput.value = Store.getMemo(sid);
-document.getElementById("hintTitle").textContent = `🕵️ 당신의 그림 — 힌트 ${sid}/12`;
+document.getElementById("hintTitle").textContent = Store.isPaid()
+  ? `🕵️ 당신의 그림 — 힌트 ${sid}/12`
+  : `🕵️ 당신의 그림`;
 
 function refreshHintUI() {
   const done = Store.isDone(sid);
+  const nextBtn = document.getElementById("nextBtn");
+
+  if (!Store.isPaid()) {
+    // 무료 체험: 힌트 대신 예고
+    document.getElementById("hintLocked").innerHTML =
+      `<span class="lock">🎁</span>
+      <span>정식 수강생에게는 이 자리에 <b style="color:var(--accent)">코치가 비밀리에 고른
+      당신만의 그림</b>의 첫 힌트가 도착합니다.<br>
+      세션마다 하나씩, 12개가 모이면 추리가 시작됩니다.</span>`;
+    if (done) {
+      nextBtn.style.display = "inline-block";
+      nextBtn.href = "apply.html";
+      nextBtn.textContent = "정식 수강 신청하기 →";
+    }
+    return;
+  }
+
   const h = Store.getHint(sid);
   if (done && h) document.getElementById("hintText").innerHTML = `"${h}"`;
   document.getElementById("hintLocked").style.display = done ? "none" : "flex";
@@ -253,7 +272,6 @@ function refreshHintUI() {
       ? "힌트 12개 완성 — 대시보드에서 추리를 제출할 수 있습니다!"
       : `힌트 ${total}개 수집 · ${12 - total}개 남음`;
   const next = COURSE.find(c => c.id === sid + 1);
-  const nextBtn = document.getElementById("nextBtn");
   if (next && done) {
     nextBtn.style.display = "inline-block";
     nextBtn.href = `session.html?s=${next.id}`;
@@ -272,7 +290,9 @@ document.getElementById("saveMemoBtn").addEventListener("click", async () => {
     return;
   }
   refreshHintUI();
-  showToast(first ? "기록 저장 완료 — 힌트가 열렸습니다 🎁" : "기록이 수정되었습니다");
+  showToast(first
+    ? (Store.isPaid() ? "기록 저장 완료 — 힌트가 열렸습니다 🎁" : "기록 저장 완료 ✍️")
+    : "기록이 수정되었습니다");
   if (first) document.getElementById("hintCard").scrollIntoView({ behavior: "smooth", block: "center" });
 });
 

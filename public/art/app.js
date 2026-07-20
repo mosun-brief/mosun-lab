@@ -78,7 +78,14 @@ const Store = {
     localStorage.setItem(this.key(n, "done"), new Date().toISOString().slice(0, 10));
   },
 
-  isUnlocked(n) { return n === 1 || this.isDone(n - 1); },
+  isPaid() { return this.mode === "remote"; },
+  // 무료 체험은 세션 1까지 — 전체 진행은 정식 수강생(원격 모드)만.
+  // (개발용 우회: localStorage에 artcourse_dev=1)
+  isUnlocked(n) {
+    if (n === 1) return true;
+    if (!this.isPaid() && !localStorage.getItem("artcourse_dev")) return false;
+    return this.isDone(n - 1);
+  },
   doneCount() { let c = 0; for (let i = 1; i <= 12; i++) if (this.isDone(i)) c++; return c; },
 
   hintUnlocked(i) { return this.isDone(i); },

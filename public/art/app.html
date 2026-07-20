@@ -27,6 +27,12 @@
 
   <div id="sessionList"></div>
 
+  <div class="card" id="applyCard" style="display:none; border-color: var(--accent); background: linear-gradient(135deg, var(--bg-panel), rgba(212,169,78,0.08))">
+    <h3>🎨 정식 수강 신청</h3>
+    <div class="sub">12세션 전체 + 코치가 고른 '당신의 그림' 스무고개 + 수료 편지까지. 세션 1이 마음에 드셨다면, 나머지 11세션이 기다립니다.</div>
+    <a class="btn" href="apply.html">신청서 작성하기 →</a>
+  </div>
+
   <div class="card">
     <h3>🕵️ 힌트 수첩</h3>
     <div class="sub">코치가 당신만을 위해 골라둔 그림 한 점. 세션을 마칠 때마다 힌트가 열립니다.</div>
@@ -69,16 +75,21 @@
 <script type="module">
 await Store.init();
 const done = Store.doneCount();
+const paid = Store.isPaid();
 
 // ── 헤더 & 진도 ──
 const name = Store.studentName();
 if (name) document.querySelector(".dash-hero h1").textContent = `${name}님의 미술 노트`;
 document.getElementById("dashFill").style.width = (done / 12 * 100) + "%";
-document.getElementById("dashLabel").textContent = `${done} / 12 세션 · 힌트 ${done}개 수집`;
-document.getElementById("dashSub").textContent =
-  done === 0 ? "여정의 시작입니다. 첫 세션이 기다리고 있어요."
+document.getElementById("dashLabel").textContent = paid
+  ? `${done} / 12 세션 · 힌트 ${done}개 수집`
+  : `무료 체험 — 세션 1이 열려 있습니다`;
+document.getElementById("dashSub").textContent = !paid
+  ? "그림 읽는 법의 첫 시간을 무료로 체험해보세요."
+  : done === 0 ? "여정의 시작입니다. 첫 세션이 기다리고 있어요."
   : done < 12 ? "차곡차곡 쌓이고 있습니다."
   : "12세션 완주! 이제 추리와 최종 미션만 남았습니다.";
+if (!paid) document.getElementById("applyCard").style.display = "block";
 
 // ── 세션 목록 ──
 const listEl = document.getElementById("sessionList");
@@ -110,16 +121,26 @@ for (const s of COURSE) {
 listEl.innerHTML = html;
 
 // ── 힌트 수첩 ──
-let hintHtml = "";
-for (let i = 1; i <= 12; i++) {
-  const open = Store.hintUnlocked(i);
-  const h = open ? Store.getHint(i) : null;
-  hintHtml += `<div class="hint-item${h ? "" : " locked-h"}">
-    <span class="n">${i}</span>
-    <span class="t">${h ? '"' + h + '"' : "세션 " + i + "을 마치면 열립니다"}</span>
-  </div>`;
+if (!paid) {
+  document.getElementById("hintList").innerHTML =
+    `<div style="font-family:var(--serif); font-size:15.5px; line-height:1.9; color:var(--ink-dim)">
+      정식 수강을 시작하면, 코치가 당신의 인터뷰를 읽고
+      <span style="color:var(--accent)">오로지 당신만을 위한 그림 한 점</span>을 비밀리에 골라둡니다.<br>
+      세션을 마칠 때마다 힌트가 하나씩 — 12개가 모이면 추리의 시간입니다.
+    </div>`;
+  document.getElementById("guessCard").style.display = "none";
+} else {
+  let hintHtml = "";
+  for (let i = 1; i <= 12; i++) {
+    const open = Store.hintUnlocked(i);
+    const h = open ? Store.getHint(i) : null;
+    hintHtml += `<div class="hint-item${h ? "" : " locked-h"}">
+      <span class="n">${i}</span>
+      <span class="t">${h ? '"' + h + '"' : "세션 " + i + "을 마치면 열립니다"}</span>
+    </div>`;
+  }
+  document.getElementById("hintList").innerHTML = hintHtml;
 }
-document.getElementById("hintList").innerHTML = hintHtml;
 
 // ── 나의 그림 (공개 편지) ──
 const letter = Store.getLetter();
