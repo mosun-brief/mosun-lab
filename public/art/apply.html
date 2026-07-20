@@ -86,18 +86,18 @@
       <div class="sub">이 답변에 따라 코스의 안내 방식과, 당신에게 준비되는 그림이 달라집니다.</div>
       <div class="field">
         <label>미술을 왜 배우고 싶으신가요?</label>
+        <span class="hint-s" style="margin: -4px 0 8px">자신에게 가장 근접한 답을 골라주세요.</span>
         <select id="f_purpose">
           <option value="">선택해주세요</option>
           <option>전시회를 제대로 즐기고 싶다</option>
           <option>교양을 쌓고, 대화에서 꺼내고 싶다</option>
           <option>그림에 끌리는데 그 이유를 알고 싶다</option>
           <option>일상에 새로운 취미가 필요하다</option>
-          <option>다른 이유가 있어요 (직접 적을게요)</option>
         </select>
-        <input type="text" id="f_purpose_etc" maxlength="200" placeholder="당신의 이유를 한 줄로 적어주세요" style="display:none; margin-top:8px">
       </div>
       <div class="field">
         <label>미술관·전시회 경험은 어느 정도인가요?</label>
+        <span class="hint-s" style="margin: -4px 0 8px">자신에게 가장 근접한 답을 골라주세요.</span>
         <select id="f_level">
           <option value="">선택해주세요</option>
           <option>거의 없음</option>
@@ -107,6 +107,7 @@
       </div>
       <div class="field">
         <label>그림 앞에 섰을 때, 어떤 경험을 바라시나요?</label>
+        <span class="hint-s" style="margin: -4px 0 8px">자신에게 가장 근접한 답을 골라주세요.</span>
         <select id="f_want">
           <option value="">선택해주세요</option>
           <option>위로와 평온 — 마음이 쉬어가는 그림</option>
@@ -116,32 +117,20 @@
         </select>
       </div>
       <div class="field">
-        <label>어떤 화면에 눈길이 머무나요?</label>
-        <select id="f_scene">
-          <option value="">선택해주세요</option>
-          <option>자연과 풍경 — 하늘, 바다, 계절의 장면</option>
-          <option>사람과 이야기 — 표정, 몸짓, 어떤 순간의 드라마</option>
-          <option>도시와 일상 — 거리, 방 안, 익숙한 사물들</option>
-          <option>색과 형태 그 자체 — 분위기로 다가오는 화면</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>어느 시대의 그림에 눈이 가나요?</label>
-        <select id="f_era">
-          <option value="">선택해주세요</option>
-          <option>정교하고 웅장한 옛 그림 (르네상스·바로크)</option>
-          <option>빛과 색이 넘실대는 그림 (인상주의 언저리)</option>
-          <option>단순하고 세련된 현대적 감각의 그림</option>
-          <option>아직 모르겠다 — 코스에서 찾아보고 싶다</option>
-        </select>
-      </div>
-      <div class="field">
         <label>좋아하거나 궁금했던 화가·그림이 있다면? <span style="color:var(--ink-dim)">(선택사항)</span></label>
         <input type="text" id="f_interest" maxlength="200" placeholder="예: 고흐, 모네의 수련… 없으면 비워두세요">
       </div>
       <div class="field">
-        <label>4주 뒤 최종 미션으로 갈 수 있는 미술관이나 전시가 있는 지역은요?</label>
-        <input type="text" id="f_region" maxlength="100" placeholder="예: 서울 (국립현대미술관), 전주 등">
+        <label>4주 뒤 최종 미션, 어느 미술관으로 가고 싶으세요? <span style="color:var(--ink-dim)">(선택사항)</span></label>
+        <select id="f_museum">
+          <option>아직은 모르겠음</option>
+          <option>서울의 미술관</option>
+          <option>광역시의 미술관 (부산·대구·광주·대전 등)</option>
+          <option>전북 대표 미술관</option>
+          <option>강원도 대표 미술관</option>
+          <option>제주도 대표 미술관</option>
+        </select>
+        <span class="hint-s">미술관을 고르신 분께는 수료 후 🎁 <b>보너스 세션</b> — 그 미술관의 대표작(또는 당신의 취향에 맞춘 작품) 해설이 추가로 제공됩니다.</span>
       </div>
     </div>
 
@@ -206,14 +195,6 @@ document.getElementById("f_contact_type").addEventListener("change", e => {
     contactPlaceholders[e.target.value] || "연락 수단을 먼저 선택해주세요";
 });
 
-// '다른 이유가 있어요' 선택 시에만 직접 입력칸 표시
-document.getElementById("f_purpose").addEventListener("change", e => {
-  const etc = document.getElementById("f_purpose_etc");
-  const custom = e.target.value.startsWith("다른 이유");
-  etc.style.display = custom ? "block" : "none";
-  if (custom) etc.focus();
-});
-
 document.getElementById("submitBtn").addEventListener("click", async () => {
   const v = id => document.getElementById(id).value.trim();
   const name = v("f_name");
@@ -222,24 +203,18 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
   if (!contactType) { alertToast("연락 수단을 선택해주세요"); return; }
   if (!contactValue) { alertToast("연락처를 적어주세요"); return; }
   const contact = `${contactType} · ${contactValue}`;
-  if (!v("f_purpose") || !v("f_level") || !v("f_want") || !v("f_scene") || !v("f_era")) {
+  if (!v("f_purpose") || !v("f_level") || !v("f_want")) {
     alertToast("코스 인터뷰의 선택 항목을 모두 골라주세요"); return;
-  }
-  const purposeIsCustom = v("f_purpose").startsWith("다른 이유");
-  if (purposeIsCustom && !v("f_purpose_etc")) {
-    alertToast("당신의 이유를 한 줄로 적어주세요"); return;
   }
   if (!v("f_q1") && !v("f_q2") && !v("f_q3") && !v("f_q4") && !v("f_q6")) {
     alertToast("'당신의 그림 인터뷰'를 한 문항 이상 적어주세요 — 그림 선정의 재료입니다"); return;
   }
   const answers = {
-    "목적": purposeIsCustom ? "직접 입력: " + v("f_purpose_etc") : v("f_purpose"),
+    "목적": v("f_purpose"),
     "경험": v("f_level"),
     "바라는_경험": v("f_want"),
-    "화면_취향": v("f_scene"),
-    "시대_취향": v("f_era"),
     "관심_화가": v("f_interest"),
-    "지역": v("f_region"),
+    "미술관": v("f_museum"),
     "그림1_좋아하는시간": v("f_q1"), "그림2_남은장면": v("f_q2"), "그림3_날씨": v("f_q3"),
     "그림4_에너지": v("f_q4"), "그림5_단어3개": v("f_q5"), "그림6_침실그림": v("f_q6")
   };
