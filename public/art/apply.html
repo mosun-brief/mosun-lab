@@ -68,8 +68,15 @@
         <input type="text" id="f_name" maxlength="40" placeholder="예: 김모수">
       </div>
       <div class="field">
-        <label>연락처</label>
-        <input type="text" id="f_contact" maxlength="120" placeholder="이메일 또는 카카오톡 오픈채팅 링크">
+        <label>연락 수단</label>
+        <select id="f_contact_type" style="margin-bottom: 8px">
+          <option value="">어디로 연락드릴까요?</option>
+          <option>휴대전화번호</option>
+          <option>카카오톡 아이디</option>
+          <option>인스타그램</option>
+          <option>이메일</option>
+        </select>
+        <input type="text" id="f_contact" maxlength="120" placeholder="연락 수단을 먼저 선택해주세요">
         <span class="hint-s">결제 안내와 수강 링크를 받으실 곳입니다.</span>
       </div>
     </div>
@@ -155,11 +162,26 @@
 
 <script src="supabase-config.js"></script>
 <script>
+// 연락 수단에 따라 입력칸 안내 변경
+const contactPlaceholders = {
+  "휴대전화번호": "예: 010-1234-5678",
+  "카카오톡 아이디": "예: mosun_art (친구 추가 가능한 ID)",
+  "인스타그램": "예: @mosun.log",
+  "이메일": "예: you@example.com"
+};
+document.getElementById("f_contact_type").addEventListener("change", e => {
+  document.getElementById("f_contact").placeholder =
+    contactPlaceholders[e.target.value] || "연락 수단을 먼저 선택해주세요";
+});
+
 document.getElementById("submitBtn").addEventListener("click", async () => {
   const v = id => document.getElementById(id).value.trim();
-  const name = v("f_name"), contact = v("f_contact");
+  const name = v("f_name");
+  const contactType = v("f_contact_type"), contactValue = v("f_contact");
   if (!name) { alertToast("이름을 적어주세요"); return; }
-  if (!contact) { alertToast("연락처를 적어주세요"); return; }
+  if (!contactType) { alertToast("연락 수단을 선택해주세요"); return; }
+  if (!contactValue) { alertToast("연락처를 적어주세요"); return; }
+  const contact = `${contactType} · ${contactValue}`;
   if (!v("f_purpose") || !v("f_level")) { alertToast("코스 인터뷰의 선택 항목을 골라주세요"); return; }
   if (!v("f_q1") && !v("f_q2") && !v("f_q3") && !v("f_q4") && !v("f_q6")) {
     alertToast("'당신의 그림 인터뷰'를 한 문항 이상 적어주세요 — 그림 선정의 재료입니다"); return;
